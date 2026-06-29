@@ -1,29 +1,21 @@
-//server and database connection
-
-require("dotenv").config();
-import connectDB from "./src/config/db";
 import app from "./app";
+import connectDB from "./src/config/db";
+import { env } from "./src/config/env";
+import { logger } from "./src/config/logger";
 
 class Server {
-    private app;
-    private readonly port: number | string;
-    private readonly url: string;
-
-    constructor() {
-        this.app = app;
-        this.port = process.env.PORT || 3001;
-        this.url = process.env.DATABASE_URL ?? "";
-    }
-
     public async start() {
         try {
-            await connectDB.connect(this.url);
-            console.log("Database Connected");
-            this.app.listen(this.port, () => {
-                console.log(`Server listening on ${this.port}...`);
+            await connectDB.connect(env.dbUrl!);
+
+            logger.info("Database Connected!");
+
+            app.listen(env.port, () => {
+                logger.info(`Server started on port ${env.port}`);
             });
-        } catch {
-            console.log("Error connecting to DB");
+
+        } catch (err) {
+            logger.error(`Error connecting to DB: ${err}`);
             process.exit(1);
         }
     }

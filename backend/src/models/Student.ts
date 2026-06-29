@@ -25,7 +25,7 @@ const StudentShema = new mongoose.Schema({
             unique: true,
         }
     }
-});
+}, { timestamps: true });
 
 const StudentModel = mongoose.model("Student", StudentShema);
 
