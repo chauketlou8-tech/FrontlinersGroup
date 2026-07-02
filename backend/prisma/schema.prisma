@@ -1,6 +1,6 @@
 datasource db {
   provider = "postgresql"
-
+  url = env("DATABASE_URL")
 }
 
 generator client {
@@ -19,6 +19,17 @@ enum Role {
   VIEWER
 }
 
+enum Subjects {
+  MATHEMATICS
+  PHYSICS
+}
+
+enum Status {
+  PENDING
+  PAID
+  OVERDUE
+}
+
 model ContactDetails {
   id      Int       @id @default(autoincrement())
   phone   String
@@ -28,18 +39,49 @@ model ContactDetails {
 }
 
 model Student {
-  id             Int            @id @default(autoincrement())
+  id             Int               @id @default(autoincrement())
   name           String
   grade          Grade
-  subject        String[]
+  subject        Subjects[]
   contactDetails ContactDetails?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  Enrollment     Enrollment?       @relation(fields: [enrollmentId], references: [id])
+  Payments       Payments          @relation(fields: [paymentId], references: [id])
+  enrollmentId   Int               @unique
+  paymentId      Int               @unique
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 }
 
 model Admin {
   id         Int @id @default(autoincrement())
+  name       String
   email      String @unique
   hashed_password String
   role Role @default(VIEWER)
+}
+
+model Enrollment {
+  id Int @id @default(autoincrement())
+  studentInfo Student?
+  selectedSubjects Subjects[]
+  grade Grade
+}
+
+model Payments {
+  id Int @id @default(autoincrement())
+  Student Student?
+  Month String
+  Amount Decimal
+  PaymentMethod String
+  ReferenceNumber BigInt
+  status Status
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model Sessions {
+  id Int @id @default(autoincrement())
+  user_id Int @unique
+  refresh_token String @unique
+  expires_at DateTime
 }

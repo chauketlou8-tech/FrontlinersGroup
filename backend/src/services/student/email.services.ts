@@ -1,7 +1,7 @@
-import { env } from "../config/env";
-import { logger } from "../config/logger";
-import transporter from "../config/mailer";
-import type { Student } from "../types/Student"
+import { env } from "../../config/env";
+import { logger } from "../../config/logger";
+import transporter from "../../config/mailer";
+import type { Student } from "../../types/Student"
 
 async function sendEmail(to: Student, subject: string, text: string) {
     try{

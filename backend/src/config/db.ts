@@ -1,14 +1,4 @@
-//function to connect to the database
+//config for the prisma client
 
-import { Pool } from "pg";
-
-class connectDB {
-    connect (url: string) {
-        return new Pool({
-            connectionString: url,
-            host: "localhost",
-        });
-    }
-}
-
-export default new connectDB();
+import { PrismaClient } from "@prisma/client";
+export default new PrismaClient();
