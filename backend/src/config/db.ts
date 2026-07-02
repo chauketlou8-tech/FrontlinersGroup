@@ -1,10 +1,13 @@
 //function to connect to the database
 
-import mongoose from 'mongoose';
+import { Pool } from "pg";
 
 class connectDB {
     connect (url: string) {
-        return mongoose.connect(url);
+        return new Pool({
+            connectionString: url,
+            host: "localhost",
+        });
     }
 }
 

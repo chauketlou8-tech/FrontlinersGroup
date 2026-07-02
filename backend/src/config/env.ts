@@ -7,6 +7,7 @@ dotenv.config({
 
 const port = process.env.PORT || 3002;
 const dbUrl = process.env.DATABASE_URL;
+const redisUrl = process.env.REDIS_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const email_user = process.env.EMAIL_USER;
@@ -15,6 +16,10 @@ const node_env = process.env.NODE_ENV;
 
 if (!dbUrl && node_env === "development") {
     throw new Error("Database url is missing");
+}
+
+if (!redisUrl && node_env === "development") {
+    throw new Error("Redis url is missing");
 }
 
 if (!JWT_SECRET && node_env === "development") {
@@ -40,6 +45,7 @@ if (!process.env.NODE_ENV && node_env === "development") {
 export const env = {
     port,
     dbUrl,
+    redisUrl,
     JWT_SECRET,
     JWT_REFRESH_SECRET,
     email_user,

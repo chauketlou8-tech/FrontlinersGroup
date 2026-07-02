@@ -1,5 +1,5 @@
 import router from "./config"
 
-router.post("/");
+router.post("/", );
 
 export default router;

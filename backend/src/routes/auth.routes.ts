@@ -1,8 +1,11 @@
-import express from 'express';
-const router = express.Router();
+import router from "./config"
+import login from "../controllers/auth.controllers";
+import authMiddleware from "../middleware/AuthMiddleware";
+import adminMiddleware from "../middleware/AdminMiddleware";
 
-router.post("", );
+router.post("/", login);//login
+router.post("/logout", authMiddleware, adminMiddleware);
+router.post("/resetPassword", );
 router.post("/refreshToken", );
-router.post("/logout", )
 
 export default router;

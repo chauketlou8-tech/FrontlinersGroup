@@ -14,8 +14,7 @@ app.use(corsMiddleware);
 app.use(express.json());
 app.use(requestLogger);
 
-//routes
-
+//error handler
 app.use(errorHandler);
 
 export default app;

@@ -2,13 +2,16 @@ import app from "./app";
 import connectDB from "./src/config/db";
 import { env } from "./src/config/env";
 import { logger } from "./src/config/logger";
+import connectRedis from "./src/config/connectRedis";
 
 class Server {
     public async start() {
         try {
             await connectDB.connect(env.dbUrl!);
+            await connectRedis(env.redisUrl!);
 
-            logger.info("Database Connected!");
+            logger.info("Connected to postgres!");
+            logger.info("Connected to redis")
 
             app.listen(env.port, () => {
                 logger.info(`Server started on port ${env.port}`);

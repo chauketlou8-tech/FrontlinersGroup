@@ -1,6 +1,6 @@
 //function to test email sending
 
-import sendEmail from "../src/services/email.services";
+import sendEmail from "../backend/src/services/email.services";
 
 const send = () => {
     const users = [
