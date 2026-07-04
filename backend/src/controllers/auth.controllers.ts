@@ -8,9 +8,9 @@ import redisClient from "../config/redisClient";
 import bcrypt from "bcryptjs";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import HelperFunctions from "../utils/helpers"
+import Response from "../utils/response"
 import { logger } from "../config/logger";
 import sendEmail from "../services/admin/email.services";
-
 
 
 const login = asyncHandler(async (req: req, res: res, next: next) => {
@@ -54,15 +54,8 @@ const login = asyncHandler(async (req: req, res: res, next: next) => {
 
     await client.set(`online:${admin.id}`, "true", { EX: 3600 });
 
-    return res.status(200).json({
-        success: true,
-        admin: {
-            id: admin.id,
-            email: admin.email,
-            role: admin.role,
-        },
-        token,
-        refreshToken,
+    return Response.success(res, {
+        data: { admin: { id: admin.id, email: admin.email, role: admin.role}, token, refreshToken }
     });
 });
 
@@ -74,15 +67,14 @@ const logout = asyncHandler(async (req: req, res: res) => {
 
     await prismaClient.sessions.delete({ where: { user_id: Number(id) } });
 
-    return res.status(200).json({
-        success: true,
-        message: "Successfully logged out",
+    return Response.success(res, {
+        message: "Successfully logged out"
     });
 });
 
 //function to get the reset password link
 const resetPassword = asyncHandler(async (req: req, res: res, next: next) => {
-    const { email } = req.body;
+    const email = req.body.email;
     const client = await redisClient;
 
     const admin: Admin = await prismaClient.admin.findUnique({ where: { email } });
@@ -118,18 +110,12 @@ const resetPassword = asyncHandler(async (req: req, res: res, next: next) => {
 
     logger.info(`email sent to ${admin.name}, subject ${subject}`);
 
-    return res.status(200).json({
-        success: true,
-    });
+    return Response.success(res);
 });
 
 const validateToken = asyncHandler(async (req: req, res: res, next: next) => {
     const token = req.query.token;
     const client = await redisClient;
-
-    if (typeof token !== "string") {
-        return next(new ValidationError("Invalid token"));
-    }
 
     const id = await client.get(`reset:${token}`);
 
@@ -137,10 +123,9 @@ const validateToken = asyncHandler(async (req: req, res: res, next: next) => {
         return next(new ValidationError("Token expired or invalid"));
     }
 
-    return res.status(200).json({
-        success: true,
-        id
-    });
+    return Response.success(res, {
+        data: { id }
+    })
 
 });
 
@@ -148,10 +133,6 @@ const setNewPassword = asyncHandler(async (req: req, res: res, next: next) => {
     const newPassword: string = req.body.newPassword;
     const token = req.query.token;
     const client = await redisClient;
-
-    if (typeof token !== "string") {
-        return next(new ValidationError("Invalid token"));
-    }
 
     const id = await client.get(`reset:${token}`);
 
@@ -170,18 +151,13 @@ const setNewPassword = asyncHandler(async (req: req, res: res, next: next) => {
 
     await client.del(`reset:${token}`);
 
-    return res.status(200).json({
-        success: true,
-        admin,
-    });
+    return Response.success(res, {
+        data: { admin: { id: admin.id, email: admin.email, role: admin.role} }
+    })
 });
 
 const refreshUserToken = asyncHandler(async (req: req, res: res, next: next) => {
     const refresh_token = req.body.refresh_token;
-
-    if (!refresh_token) {
-        return next(new ValidationError("Refresh token is required"));
-    }
 
     // verify token first
     let decoded;
@@ -192,7 +168,6 @@ const refreshUserToken = asyncHandler(async (req: req, res: res, next: next) => 
     }
 
     // check session exists
-    // @ts-ignore
     const session = await prismaClient.sessions.findUnique({ where: { refresh_token }})
 
     if (!session) {
@@ -201,13 +176,11 @@ const refreshUserToken = asyncHandler(async (req: req, res: res, next: next) => 
 
     // check expiry
     if (new Date(session.expires_at) < new Date()) {
-        // @ts-ignore
         await prismaClient.sessions.delete({ where: { refresh_token }});
         return next(new AuthenticationError("Refresh token expired"));
     }
 
     // ROTATION: delete old session (prevents reuse)
-    // @ts-ignore
     await prismaClient.sessions.delete({ where: { refresh_token } })
 
     // issue new access token
@@ -233,9 +206,8 @@ const refreshUserToken = asyncHandler(async (req: req, res: res, next: next) => 
         }
     })
 
-    return res.status(200).send({
-        token: accessToken,
-        refreshToken: newRefreshToken
+    return Response.success(res, {
+        data: { token: accessToken, refresh_token: newRefreshToken }
     });
 });
 

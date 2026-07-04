@@ -1,14 +1,12 @@
-import express from "express";
-import { logger } from "../config/logger";
-import createError from "../errors/createError";
+import type { res, req, next } from "../types/express"
+import { AuthorizationError } from "../errors";
 
-const adminMiddleware = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+const adminMiddleware = (req: req, res: res, next: next) => {
     //@ts-ignore
     const role = req.user.role;
 
     if (role !== 'admin') {
-        logger.error("Unauthorized authentication");
-        return next(createError("Not Authorized", 403));
+        return next(new AuthorizationError("Not Authorized"));
     }
 
     next();
