@@ -1,5 +1,0 @@
-@import '../../node_modules/tailwindcss/dist/lib.d.mts' source(none);
-@import '../../node_modules/tw-animate-css/dist/tw-animate.css';
-
-@source '../**/*.{js,ts,jsx,tsx}';
-

@@ -15,7 +15,7 @@
     "@react-three/fiber": "^9.6.1",
     "@tailwindcss/cli": "^4.1.18",
     "@tailwindcss/postcss": "^4.1.18",
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "^4.3.2",
     "axios": "^1.18.0",
     "date-fns": "^3.3.0",
     "framer-motion": "^11.0.0",
@@ -31,7 +31,7 @@
     "recharts": "^2.8.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^4.3.2",
     "three": "^0.163.0",
     "uuid": "14.0.0",
     "yup": "^1.3.0"

@@ -1,4 +1,4 @@
-const links: { label: string; page: string }[] = [
+const links = [
     { label: "Home", page: "home" },
     { label: "About", page: "about" },
     { label: "Subjects", page: "subjects" },

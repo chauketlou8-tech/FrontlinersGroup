@@ -1,9 +1,15 @@
 import AppRoutes from "./routes/AppRoutes.tsx";
+import { ActiveLinkProvider } from "./providers/ActiveLinkProvider.tsx";
+import { EnrollmentProvider } from "./providers/EnrollmentProvider.tsx";
 
 function App() {
 
   return (
-      <AppRoutes />
+      <EnrollmentProvider>
+          <ActiveLinkProvider>
+              <AppRoutes />
+          </ActiveLinkProvider>
+      </EnrollmentProvider>
   )
 }
 
