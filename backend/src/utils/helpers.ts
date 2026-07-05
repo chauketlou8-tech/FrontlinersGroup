@@ -26,6 +26,23 @@ class HelperFunctions {
         return emailRegex.test(email.trim());
     }
 
+    public formatSubjects(subject: string): string[] {
+        if (subject === "Both Mathematics & Physics") {
+            return ["Mathematics", "Physics"]
+        }
+        else if (subject === "Physical Sciences (Physics)") {
+            return ["Physics"]
+        }
+        else {
+            return ["Mathematics"]
+        }
+    }
+
+    public isValidNumber(phone: string): boolean {
+        const regex = /^0(6[0-9]|7[0-9]|8[0-9])[0-9]{7}$/;
+        return regex.test(phone);
+    }
+
 }
 
 export default new HelperFunctions();

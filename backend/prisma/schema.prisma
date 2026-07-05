@@ -19,11 +19,6 @@ enum Role {
   VIEWER
 }
 
-enum Subjects {
-  MATHEMATICS
-  PHYSICS
-}
-
 enum Status {
   PENDING
   PAID
@@ -39,17 +34,36 @@ model ContactDetails {
 }
 
 model Student {
-  id             Int               @id @default(autoincrement())
+  id             Int             @id @default(autoincrement())
   name           String
   grade          Grade
-  subject        Subjects[]
+  subject        String[]
   contactDetails ContactDetails?
-  Enrollment     Enrollment?       @relation(fields: [enrollmentId], references: [id])
-  Payments       Payments          @relation(fields: [paymentId], references: [id])
-  enrollmentId   Int               @unique
-  paymentId      Int               @unique
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  Enrollment     Enrollment?
+  Payments       Payments[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model Enrollment {
+  id        Int     @id @default(autoincrement())
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId Int     @unique
+  selectedSubjects String[]
+  grade     Grade
+}
+
+model Payments {
+  id        Int     @id @default(autoincrement())
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId Int
+  Month     String
+  Amount    Decimal
+  PaymentMethod String
+  ReferenceNumber String
+  status    Status
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Admin {
@@ -58,25 +72,6 @@ model Admin {
   email      String @unique
   hashed_password String
   role Role @default(VIEWER)
-}
-
-model Enrollment {
-  id Int @id @default(autoincrement())
-  studentInfo Student?
-  selectedSubjects Subjects[]
-  grade Grade
-}
-
-model Payments {
-  id Int @id @default(autoincrement())
-  Student Student?
-  Month String
-  Amount Decimal
-  PaymentMethod String
-  ReferenceNumber BigInt
-  status Status
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
 }
 
 model Sessions {

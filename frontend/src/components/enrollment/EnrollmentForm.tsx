@@ -1,8 +1,9 @@
 import Field from "../ui/Field.tsx";
 import { ChevronDown, Send, ArrowRight } from "lucide-react";
-import {useState, type ChangeEvent, type FormEvent} from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEnrollment } from "../../hooks/useEnrollment";
+//import enroll from "../../services/enrollment.services.ts"
 
 export default function EnrollmentForm({ setStep }: { setStep: (step: string) => void }) {
     const navigate = useNavigate();
@@ -46,6 +47,7 @@ export default function EnrollmentForm({ setStep }: { setStep: (step: string) =>
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
+        setIsSubmitting(true);
 
         if (!validate()) {
             const firstErrorField = document.querySelector('[data-error="true"]');
@@ -55,9 +57,21 @@ export default function EnrollmentForm({ setStep }: { setStep: (step: string) =>
             return;
         }
 
-        setIsSubmitting(true);
-        await new Promise(resolve => setTimeout(resolve, 1500));
+
+/*        const enrollData = {
+            firstName: data.firstName,
+            surname: data.lastName,
+            email: data.email || null,
+            grade: data.grade,
+            subject: data.subject,
+            phoneNumber: data.phone
+        }*/
+
+        //enroll
+        //await enroll(enrollData)
+
         setIsSubmitting(false);
+
         handleNavigate("enrollments/payment");
     };
 
