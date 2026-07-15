@@ -15,8 +15,8 @@ const authenticationMiddleware = (req: express.Request, res: express.Response, n
     const token = authHeader.split(" ")[1];
 
     try {
-        //@ts-ignore
-        const decoded = jwt.verify(token, env.JWT_SECRET);
+
+        const decoded = jwt.verify(token, env.JWT_SECRET!);
         // @ts-ignore
         const { id, name, role } = decoded;
         //@ts-ignore

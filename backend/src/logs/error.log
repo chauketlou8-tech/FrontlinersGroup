@@ -1,0 +1,13 @@
+{"level":"error","message":"Redis error: Error: read ECONNRESET","timestamp":"2026-07-14T18:20:57.519Z"}
+{"level":"error","message":"Redis error: Error: getaddrinfo ENOTFOUND redis-16056.c232.us-east-1-2.ec2.cloud.redislabs.com","timestamp":"2026-07-14T18:20:57.994Z"}
+{"level":"error","message":"Redis error: Error: getaddrinfo ENOTFOUND redis-16056.c232.us-east-1-2.ec2.cloud.redislabs.com","timestamp":"2026-07-14T18:20:58.234Z"}
+{"level":"error","message":"Redis error: Error: getaddrinfo ENOTFOUND redis-16056.c232.us-east-1-2.ec2.cloud.redislabs.com","timestamp":"2026-07-14T18:20:58.506Z"}
+{"level":"error","message":"Redis error: Error: getaddrinfo ENOTFOUND redis-16056.c232.us-east-1-2.ec2.cloud.redislabs.com","timestamp":"2026-07-14T18:20:58.900Z"}
+{"level":"error","message":"Redis error: Error: read ECONNRESET","timestamp":"2026-07-14T18:20:58.886Z"}
+{"level":"error","message":"Redis error: Error: getaddrinfo ENOTFOUND redis-16056.c232.us-east-1-2.ec2.cloud.redislabs.com","timestamp":"2026-07-14T18:20:59.079Z"}
+{"level":"error","message":"Redis error: Error: getaddrinfo ENOTFOUND redis-16056.c232.us-east-1-2.ec2.cloud.redislabs.com","timestamp":"2026-07-14T18:20:59.338Z"}
+{"level":"error","message":"Redis error: Error: getaddrinfo ENOTFOUND redis-16056.c232.us-east-1-2.ec2.cloud.redislabs.com","timestamp":"2026-07-14T18:20:59.463Z"}
+{"level":"error","message":"Redis error: Error: getaddrinfo ENOTFOUND redis-16056.c232.us-east-1-2.ec2.cloud.redislabs.com","timestamp":"2026-07-14T18:20:59.568Z"}
+{"level":"error","message":"Redis error: Error: getaddrinfo ENOTFOUND redis-16056.c232.us-east-1-2.ec2.cloud.redislabs.com","timestamp":"2026-07-14T18:22:12.972Z"}
+{"level":"error","message":"Redis error: Error: getaddrinfo ENOTFOUND redis-16056.c232.us-east-1-2.ec2.cloud.redislabs.com","timestamp":"2026-07-14T18:22:12.971Z"}
+{"level":"error","message":"Redis error: Error: getaddrinfo ENOTFOUND redis-16056.c232.us-east-1-2.ec2.cloud.redislabs.com","timestamp":"2026-07-14T18:22:13.638Z"}

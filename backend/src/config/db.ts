@@ -1,4 +1,10 @@
-//config for the prisma client
+import { Pool } from 'pg';
 
-import { PrismaClient } from "@prisma/client";
-export default new PrismaClient();
+const connectDB = (url: string) => {
+    return new Pool({
+        connectionString: url,
+        host: "localhost",
+    });
+}
+
+export default connectDB;

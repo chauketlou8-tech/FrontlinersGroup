@@ -2,12 +2,16 @@ import app from "./app";
 import { env } from "./src/config/env";
 import { logger } from "./src/config/logger";
 import connectRedis from "./src/config/connectRedis";
+import connectDB from "./src/config/db";
 
 class Server {
     public async start() {
         try {
             await connectRedis(env.redisUrl!);
-            logger.info("Connected to redis")
+            connectDB(env.dbUrl!);
+
+            logger.info("Connected to redis");
+            logger.info("Connected to database");
 
             app.listen(env.port, () => {
                 logger.info(`Server started on port ${env.port}`);

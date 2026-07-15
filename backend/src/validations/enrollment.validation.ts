@@ -1,7 +1,10 @@
 import { ValidationError, ConflictError } from "../errors";
 import HelperFunctions from "../utils/helpers";
 import type { res, req, next } from "../types/express"
-import prismaClient from "../config/db"
+import connectDB from "../config/db"
+import { env } from "std-env";
+
+const pool = connectDB(env.dbUrl!)
 
 class EnrollmentValidator {
     public async enrollmentValidation(req: req, res: res, next: next) {
@@ -16,10 +19,11 @@ class EnrollmentValidator {
                 return next(new ValidationError("Invalid email"));
             }
 
-            const existing_user = await prismaClient.admin.findMany({ where: { email } });
+            const result = await pool.query(`select * from admin where email = $1`, [email]);
+            const existing_user = result.rows[0];
 
             if (existing_user) {
-                return next(new ConflictError("Email in use"));
+                return next(new ConflictError("Email already in use"));
             }
         }
 

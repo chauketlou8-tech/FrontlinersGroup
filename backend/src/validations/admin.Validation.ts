@@ -1,7 +1,9 @@
 import { next, req, res } from "../types/express";
 import { ConflictError, ValidationError } from "../errors";
-import prismaClient from "../config/db"
+import connectDB from "../config/db"
+import { env } from "std-env";
 
+const pool = connectDB(env.dbUrl!)
 
 class AdminValidator {
     public async createValidation(req: req, res: res, next: next) {
@@ -11,7 +13,8 @@ class AdminValidator {
             return next(new ValidationError("Missing credentials"))
         }
 
-        const existing_user = await prismaClient.admin.findMany({ where: { email } });
+        const result = await pool.query(`select * from admin where email = $1`, [email]);
+        const existing_user = result.rows[0];
 
         if (existing_user) {
             return next(new ConflictError("Email already in use"));

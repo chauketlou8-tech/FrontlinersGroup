@@ -7,7 +7,6 @@
     "start": "nodemon --exec ts-node server.ts"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "axios": "^1.18.1",
     "bcryptjs": "^2.4.3",
@@ -18,7 +17,6 @@
     "express-validator": "^7.0.0",
     "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.21",
-    "mongoose": "^8.0.0",
     "morgan": "^1.10.0",
     "nodemailer": "8.0.5",
     "pg": "^8.22.0",

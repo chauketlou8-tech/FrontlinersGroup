@@ -1,4 +1,4 @@
-import prismaClient from "../config/db"
+import connectDB from "../config/db"
 import asyncHandler from "../middleware/AsyncHandler"
 import type { req, res } from "../types/express"
 import HelperFunctions from "../utils/helpers"
@@ -7,50 +7,34 @@ import { logger } from "../config/logger";
 import sendEmail from "../services/student/email.services";
 import sendWhatsAppMessage from "../services/student/whatsApp.services";
 import sendSMS from "../services/student/sms.services";
+import { env } from "../config/env";
+import type { Student } from "../types/Student";
+
+const pool = connectDB(env.dbUrl!);
 
 const enroll = asyncHandler(async (req: req, res: res) => {
     const { name, surname, grade, subject, phoneNumber, email } = req.body;
 
-    const fullName = name + " " + surname;
-    const contactDetails = {
-        phone: phoneNumber.replace(/^0/, "+27").split(" ").join(""),
-        email: email,
-    }
+    const fullName = `${name} ${surname}`;
+    const phone = phoneNumber.replace(/^0/, "+27").split(" ").join("");
+    const subjects = HelperFunctions.formatSubjects(subject)
 
     //record the student
-    const student = await prismaClient.student.create({
-        data: {
-            name: fullName,
-            grade: grade.toUpperCase(),
-            subject: HelperFunctions.formatSubjects(subject),
-            contactDetails: {
-                create: contactDetails,
-            },
-        },
-        include: {
-            contactDetails: true
-        }
-    });
+    const contactResult = await pool.query(`insert into contactdetails(phone, email) values($1, $2) returning *`, [phone, email]);
+    const contactDetails = contactResult.rows[0];
 
-    logger.info(`Student ${student.id}`);
+    const studentResult = await pool.query(`insert into students(name, grade, subjects, contactdetailsid) values($1, $2, $3, $4) returning *`, [fullName, grade, subjects, contactDetails.id]);
+    const student: Student = studentResult.rows[0];
+
+    logger.info(`Successfully created student ${student.id}, name: ${student.name}`);
 
     //sign them up for an enrollment
-    const enrollment = await prismaClient.enrollment.create({
-        data: {
-            student: {
-                connect: {
-                    id: student.id
-                }
-            },
-            selectedSubjects: HelperFunctions.formatSubjects(subject),
-            grade
-        }
-    });
+    const result = await pool.query(`insert into enrollments(studentid, subjects, grade) values($1, $2, $3) returning *`, [student.id, subjects, grade]);
+    const enrollment = result.rows[0];
 
     logger.info(`Enrollment ${enrollment.uuid} created for ${student.name}`);
 
-    if (student.contactDetails!.email) {
-
+    if (student.contactDetails.email) {
         const email_message = `
             Hello ${student.name},
 
@@ -73,7 +57,6 @@ const enroll = asyncHandler(async (req: req, res: res) => {
         `
 
         const subject = "Welcome to Frontliners Group - Enrollment Confirmed"
-        //@ts-ignore
         await sendEmail(student, subject, email_message);
     }
 
@@ -89,14 +72,14 @@ const enroll = asyncHandler(async (req: req, res: res) => {
         
         Glad to have you on board.
     `
-    //@ts-ignore
+
     const isSendWhatsApp = await sendWhatsAppMessage(student, whatsAppMessage);
 
     if (!isSendWhatsApp) {
         const smsMessage = `
             Hi ${student.name}, Frontliners Group: Your registration is confirmed. Questions? Reply to this SMS or call +27-79-043-3094.
         `
-        await sendSMS(student.contactDetails!.phone, smsMessage);
+        await sendSMS(student.contactDetails.phone, smsMessage);
     }
 
     return Response.success(res, {

@@ -1,4 +1,4 @@
-import prismaClient from "../config/db"
+import connectDB from "../config/db";
 import asyncHandler from "../middleware/AsyncHandler";
 import type { Admin } from "../types/Admin";
 import type { req, res, next } from "../types/express"
@@ -12,21 +12,20 @@ import Response from "../utils/response"
 import { logger } from "../config/logger";
 import sendEmail from "../services/admin/email.services";
 
+const pool = connectDB(env.dbUrl!);
 
 const login = asyncHandler(async (req: req, res: res, next: next) => {
     const { email, password } = req.body;
     const client = await redisClient;
 
-    const admin: Admin = await prismaClient.admin.findUnique({
-        where: { email },
-    }
-    );
+    const result = await pool.query(`select * from admin where email = $1`, [email]);
+    const admin: Admin = result.rows[0];
 
     if (!admin) {
         return next(new NotFoundError("Admin does not exist"));
     }
 
-    const isMatch = await bcrypt.compare(password, admin.hashed_password);
+    const isMatch = await bcrypt.compare(password, admin.password);
 
     if (!isMatch) {
         return next(new AuthenticationError("Passwords do not match"));
@@ -44,13 +43,9 @@ const login = asyncHandler(async (req: req, res: res, next: next) => {
         { expiresIn: "7d" }
     );
 
-    await prismaClient.sessions.create({
-        data: {
-            user_id: admin.id,
-            refresh_token: refreshToken,
-            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-        }
-    });
+    const expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+
+    await pool.query(`insert into sessions(user_id, refresh_token, expires_at) values($1, $2, $3)`, [admin.id, refreshToken, expires_at]);
 
     await client.set(`online:${admin.id}`, "true", { EX: 3600 });
 
@@ -64,8 +59,7 @@ const logout = asyncHandler(async (req: req, res: res) => {
     const id = req.params.id;
 
     await client.del(`online:${id}`);
-
-    await prismaClient.sessions.delete({ where: { user_id: Number(id) } });
+    await pool.query(`delete from sessions where user_id = $1`, [Number(id)]);
 
     return Response.success(res, {
         message: "Successfully logged out"
@@ -77,7 +71,8 @@ const resetPassword = asyncHandler(async (req: req, res: res, next: next) => {
     const email = req.body.email;
     const client = await redisClient;
 
-    const admin: Admin = await prismaClient.admin.findUnique({ where: { email } });
+    const result = await pool.query(`select * from admin where email = $1`, [email]);
+    const admin: Admin = result.rows[0];
 
     if (!admin) {
         return next(new NotFoundError("Admin does not exist"));
@@ -125,7 +120,7 @@ const validateToken = asyncHandler(async (req: req, res: res, next: next) => {
 
     return Response.success(res, {
         data: { id }
-    })
+    });
 
 });
 
@@ -141,13 +136,13 @@ const setNewPassword = asyncHandler(async (req: req, res: res, next: next) => {
     }
 
     const hashedPassword = await HelperFunctions.hashPassword(newPassword)
-    const admin = await prismaClient.admin.update({
-        where: { id: Number(id) },
-        data: {
-            hashed_password: hashedPassword
-        },
-        select: { id: true, email: true, role: true }
-    });
+
+    const result = await pool.query(`update admin set password = $1 where id = $2 returning *`, [hashedPassword, id]);
+    const admin: Admin = result.rows[0];
+
+    if (!admin) {
+        return next(new NotFoundError("Admin not found"));
+    }
 
     await client.del(`reset:${token}`);
 
@@ -168,7 +163,8 @@ const refreshUserToken = asyncHandler(async (req: req, res: res, next: next) => 
     }
 
     // check session exists
-    const session = await prismaClient.sessions.findUnique({ where: { refresh_token }})
+    const result = await pool.query(`select * from sessions where refresh_token = $1`, [refresh_token]);
+    const session = result.rows[0];
 
     if (!session) {
         return next(new AuthenticationError("Refresh token not found"));
@@ -176,12 +172,12 @@ const refreshUserToken = asyncHandler(async (req: req, res: res, next: next) => 
 
     // check expiry
     if (new Date(session.expires_at) < new Date()) {
-        await prismaClient.sessions.delete({ where: { refresh_token }});
+        await pool.query(`delete from sessions where refresh_token = $1`, [refresh_token]);
         return next(new AuthenticationError("Refresh token expired"));
     }
 
     // ROTATION: delete old session (prevents reuse)
-    await prismaClient.sessions.delete({ where: { refresh_token } })
+    await pool.query(`delete from sessions where refresh_token = $1`, [refresh_token]);
 
     // issue new access token
     const accessToken = jwt.sign(
@@ -198,13 +194,8 @@ const refreshUserToken = asyncHandler(async (req: req, res: res, next: next) => 
     );
 
     // store new session
-    await prismaClient.sessions.create({
-        data: {
-            user_id: decoded.id,
-            refresh_token: newRefreshToken,
-            expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        }
-    })
+    const expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    await pool.query(`insert into sessions(user_id, refresh_token, expires_at) values($1, $2, $3)`, [decoded.id, newRefreshToken, expires_at])
 
     return Response.success(res, {
         data: { token: accessToken, refresh_token: newRefreshToken }
